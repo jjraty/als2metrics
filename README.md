@@ -1,4 +1,4 @@
-# als2metrics: An R package for the computation of metrics from airborne LiDAR data
+# als2metrics: An R package for the extraction of metrics from an airborne LiDAR point cloud
 
 Eetu Kotivuori, Mikko Kukkonen, Janne Räty & Petteri Packalen, 2017
 
