@@ -2,7 +2,7 @@
 % Please edit documentation in R/als2metrics.R
 \name{als2metrics}
 \alias{als2metrics}
-\title{Computation of metrics from an airborne LiDAR point cloud}
+\title{als2metris: Extract metrics from an airborne LiDAR point cloud}
 \usage{
 als2metrics(
   ALSFILE = NULL,
@@ -60,23 +60,23 @@ First seven columns must be in the abovementioned order, additional columns are 
 \code{als2metrics} Prints a .txt file to the user-defined path.
 }
 \description{
-\code{als2metrics} is used to copmute a metrics from an airborne LiDAR point cloud
+\code{als2metrics} is used to extract metrics from an airborne LiDAR point cloud
 }
 \examples{
-als2metrics( "lidar_data.txt",            # A Path of an airborne LiDAR data file
-            TRUE,                        # Compute first echo metrics
-            TRUE,                        # Compute last echo metrics
-            TRUE,                        # Compute intermediate echo metrics
-            TRUE,                        # Compute all echo metrics
-            TRUE,                        # Compute proportions of echo categories
-            TRUE,                        # Compute basic statistics
-            seq(0.05, 0.95, 0.05),       # Vector of percentiles
-            TRUE,                        # Compute densities
-            c(0.5, 2, 5, 10, 15, 20),    #  Vector of heights in fixed height densities
-            TRUE,                        # Compute intensity statistics
-            TRUE,                        # Compute intensity percentiles
-            0.0,                         # Cutoff threshold
-            10,                          # Minimum number of echoes
-            "lidar_metrics.txt"          # Output file having ALS metrics
+als2metrics(ALSFILE = "C:/Temp/lidar_data.txt",            # A Path of an airborne LiDAR data file
+           FIRST = TRUE,                        			 # Compute first echo metrics
+           LAST = TRUE,                        			 # Compute last echo metrics
+           INTERMEDIATE = TRUE,                           # Compute intermediate echo metrics
+           ALL_ECHOES = TRUE,                             # Compute all echo metrics
+           PROP_MEAN_ETYP = TRUE,                         # Compute proportions of echo categories
+           BASIC_STATISTICS = TRUE,                       # Compute basic statistics
+           PERCENTILE_SCALE = seq(0.05, 0.95, 0.05),      # Vector of percentiles
+           DENSITIES = TRUE,                              # Compute densities
+           DENSITIES_FIXED_TRESHOLD = c(0.5, 2, 5, 10, 15, 20),    # Vector of heights in fixed height densities
+           INTENSITY_STATISTICS = TRUE,                            # Compute intensity statistics
+           INTENSITY_PERCENTILES = TRUE,                           # Compute intensity percentiles
+           CUTOFF = 0.0,                                  # Cutoff threshold
+           MIN_ECHO_N = 10,                               # Minimum number of echoes
+           output = "lidar_metrics.txt"                   # Output file 
 )
 }
