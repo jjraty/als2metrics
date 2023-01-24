@@ -1,10 +1,10 @@
 rm(list=ls())
 require(data.table)
 require(tidyverse)
-work_folder <- "C:/Users/janr/Desktop/m_folder/Hiidenportti/"
+work_folder <- "Y:\\users\\L2682\\smk_2018_circle_dz\\plot_circ\\"
 
 als_data <- fread(paste0(work_folder, 
-                         "hiidenportti_plots_dz.txt"))
+                         "smk_circplots_dz.txt"))
 
 # Loop over plots and compute some additional metrics
 # Cover indices: FCI; LCI
@@ -89,15 +89,19 @@ for (i in 1:length(unique_plots)) {
       }
     }
     
-    bins <- cut(als$V5, breaks = seq(0, maxbin, bin), right = FALSE, 
-                labels = (seq(0, (maxbin - bin), bin) + bin / 2))
-    # remove NAs that are outside the "complete" bins
-    bins <- bins[!is.na(bins)]
-    fracts <- as.numeric(table(bins) / sum(table(bins)))
-    
-    nbins <- length(fracts)
-    
-    vc <- -sum(fracts * log(fracts) / log(nbins))
+    if (maxbin >= bin) {
+      bins <- cut(als$V5, breaks = seq(0, maxbin, bin), right = FALSE, 
+                  labels = (seq(0, (maxbin - bin), bin) + bin / 2))
+      # remove NAs that are outside the "complete" bins
+      bins <- bins[!is.na(bins)]
+      fracts <- as.numeric(table(bins) / sum(table(bins)))
+      
+      nbins <- length(fracts)
+      
+      vc <- -sum(fracts * log(fracts) / log(nbins))
+    } else {
+      vc <- NaN
+    }
     
     return(vc)
   }
@@ -115,4 +119,4 @@ for (i in 1:length(unique_plots)) {
   out_frame[i, "vc_2m"] <-   vc(als = plot_points, bin = 2)
 }
 
-write.table(out_frame, paste0(work_folder, "additional_hiidenportti_metrics.txt"), col.names = TRUE, row.names = F, quote = F)
+write.table(out_frame, paste0(work_folder, "additional_smkplots_metrics.txt"), col.names = TRUE, row.names = F, quote = F)
