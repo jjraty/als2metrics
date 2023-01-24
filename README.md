@@ -4,7 +4,7 @@ Eetu Kotivuori, Mikko Kukkonen, Janne Räty & Petteri Packalen, 2017
 
 # Installation
 
-Install the *als2metrics* package from GitHub github using the R package *remotes*:
+Install the *als2metrics* package from GitHub using the R package *remotes*:
 
 ``` r
 remotes::install_github("jjraty/als2metrics", ref = "main")
@@ -31,35 +31,35 @@ als2metrics(ALSFILE = "lidar_data.txt",            # A Path of an airborne LiDAR
 )
 ```
 
-**ALSFILE, A Path of an airborne LiDAR data file:** Specify an airborne LiDAR data file (text file), Format: plot_cell_id; x; y; z; dz, i; echotype; flightline; terraclass; GPS-time (delimeter: space). First seven columns must be in the aforementioned order, additional columns are optional.
+**ALSFILE:** Specify an airborne LiDAR data file (text file), Format: plot_cell_id; x; y; z; dz, i; echotype; flightline; terraclass; GPS-time (delimeter: space). First seven columns must be in the aforementioned order, additional columns are optional. String.
 
-**FIRST, Compute first echo metrics:** Output for FIRST echoes (first + only)
+**FIRST:** Output for FIRST echoes (first + only). Logical.
 
-**LAST, Compute last echo metrics:** Output for LAST echoes (last + only)
+**LAST:** Output for LAST echoes (last + only). Logical.
 
-**INTERMEDIATE, Compute intermediate echo metrics:** Output INTERMEDIATE echoes (intermediate)
+**INTERMEDIATE:** Output INTERMEDIATE echoes (intermediate). Logical.
 
-**ALL_ECHOES, Compute all echo metrics:** Output ALL echoes (first, last, only and intermediate)
+**ALL_ECHOES:** Output ALL echoes (first, last, only and intermediate). Logical.
 
-**PROP_MEAN_ETYP, Compute proportions of echo categories:** Calculates mean and standard deviation of heights and the proportion of echoes categories
+**PROP_MEAN_ETYP:** Calculates mean and standard deviation of heights and the proportion of echoes categories. Logical.
 
-**BASIC_STATISTICS, Compute basic statistics:** Calculates mean, std, med, min, max, skew, kurt
+**BASIC_STATISTICS:** Calculates mean, std, med, min, max, skew, kurt. Logical.
 
-**PERCENTILE_SCALE, A vector of percentiles:** Set a vector of percentiles, e.g using seq(...) function. Percentiles are calculated using quantile() -function (using default type=7)
+**PERCENTILE_SCALE:** Set a vector of percentiles, e.g using seq(...) function. Percentiles are calculated using quantile() -function (using default type=7). Vector.
 
-**DENSITIES, Compute densities:** Calculates densities, i.e. echo proportion under or equal to the determined height value
+**DENSITIES:** Calculates densities, i.e. echo proportion under or equal to the determined height value. Logical.
 
-**DENSITIES_FIXED_TRESHOLD, Vector of heights in fixed height densities:** The height values fixed height densities are computed
+**DENSITIES_FIXED_TRESHOLD:** The height values fixed height densities are computed. Vector.
 
-**INTENSITY_STATISTICS, Compute intensity statistics:** Calculates mean_int, std_int, med_int, min_int, max_int, skew_int, kurt_int
+**INTENSITY_STATISTICS:** Calculates mean_int, std_int, med_int, min_int, max_int, skew_int, kurt_int. Logical.
 
-**INTENSITY_PERCENTILES, Compute intensity percentiles:** Calculate perecentiles in the same manner as for dZ values ('Compute percentiles' must be set to T)
+**INTENSITY_PERCENTILES:** Calculate perecentiles in the same manner as for dZ values ('Compute percentiles' must be set to TRUE). Logical.
 
-**CUTOFF,Cutoff threshold:** Cuts off all echoes smaller or equal to the given threshold value.
+**CUTOFF:** Cuts off all echoes smaller or equal to the given threshold value. Numeric.
 
-**MIN_ECHO_N, Minimum number of echoes:** Minimum number of echoes to compute metrics.
+**MIN_ECHO_N:** Minimum number of echoes to compute metrics. Numeric.
 
-**output:** Output path with a file name. Output file format is .txt.
+**output:** Output path with a file name. Output file format is .txt. String.
 
 # Description of an output file
 
