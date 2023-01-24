@@ -11,4 +11,4 @@ Authors@R: c(person("Kotivuori", "Eetu", email = "eetu.kotivuori@smk.fi", role =
   person("Packalen", "Petteri", email = "petteri.packalen@luke.fi", role = c("aut")))
 Maintainer: Janne R\U00E4ty <janne.raty1@gmail.com>
 License: GPL3
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1

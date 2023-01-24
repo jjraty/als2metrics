@@ -1,11 +1,87 @@
 ########################################################
 #15.02.2017
-#Eetu Kotivuori, Mikko Kukkonen, Janne Räty & Petteri Packalen
+#Eetu Kotivuori, Mikko Kukkonen, Janne R?ty & Petteri Packalen
 ########################################################
-
-als2metrics <- function(ALSFILE, FIRST, LAST, INTERMEDIATE, ALL_ECHOES, PROP_MEAN_ETYP,BASIC_STATISTICS,PERCENTILE_SCALE,
-                        DENSITIES,DENSITIES_FIXED_TRESHOLD,INTENSITY_STATISTICS,INTENSITY_PERCENTILES, CUTOFF, MIN_ECHO_N, output){
-
+#' Computation of metrics from an airborne LiDAR point cloud
+#'
+#' \code{als2metrics} is used to copmute a metrics from an airborne LiDAR point cloud
+#' @param ALSFILE Specify an ALS file (text file), Format: plot_cell_id; x; y; z; dz, i; 
+#' echotype; flightline; terraclass; GPS-time (delimeter: space). 
+#' First seven columns must be in the abovementioned order, additional columns are optional. String.
+#' @param FIRST Output metrics computed based on  FIRST echoes (first + only)
+#' (rows). It is recommended to use row and column names. Logical.
+#' @param LAST Output metrics computed based on  LAST echoes (last + only). Logical.
+#' @param INTERMEDIATE Output metrics computed based on INTERMEDIATE echoes (intermediate). Logical.
+#' @param ALL_ECHOES Output metrics computed based on ALL echoes (first, last, only and intermediate). Logical.
+#' @param PROP_MEAN_ETYP Calculate mean and standard deviation of heights and the proportion of echoes categories. Logical.
+#' @param BASIC_STATISTICS Calculates mean, std, med, min, max, skew, kurt. Logical.
+#' @param PERCENTILE_SCALE A vector of percentiles, e.g using seq(...) function. Percentiles are calculated using quantile() -function (using default type=7)
+#' @param DENSITIES  Calculates densities, i.e. echo proportion under or equal to the determined height value. Logical.
+#' @param DENSITIES_FIXED_TRESHOLD The height values fixed height densities are computed. Vector.
+#' @param INTENSITY_STATISTICS Calculates mean_int, std_int, med_int, min_int, max_int, skew_int, kurt_int
+#' @param INTENSITY_PERCENTILES Calculate perecentiles in the same manner as for dZ values ('Compute percentiles' must be set to TRUE). Logical.
+#' @param CUTOFF Cut off all echoes smaller or equal to the given threshold value. Numeric.
+#' @param MIN_ECHO_N Minimum number of echoes to compute metrics. Numeric.
+#' @param output A path of the output file, including file name as a .txt format. String.
+#' 
+#' @return \code{als2metrics} Prints a .txt file to the user-defined path.
+#'
+#' @examples
+#'als2metrics( "lidar_data.txt",            # A Path of an airborne LiDAR data file
+#'             TRUE,                        # Compute first echo metrics
+#'             TRUE,                        # Compute last echo metrics
+#'             TRUE,                        # Compute intermediate echo metrics
+#'             TRUE,                        # Compute all echo metrics
+#'             TRUE,                        # Compute proportions of echo categories
+#'             TRUE,                        # Compute basic statistics
+#'             seq(0.05, 0.95, 0.05),       # Vector of percentiles
+#'             TRUE,                        # Compute densities
+#'             c(0.5, 2, 5, 10, 15, 20),    #  Vector of heights in fixed height densities
+#'             TRUE,                        # Compute intensity statistics
+#'             TRUE,                        # Compute intensity percentiles
+#'             0.0,                         # Cutoff threshold
+#'             10,                          # Minimum number of echoes
+#'             "lidar_metrics.txt"          # Output file having ALS metrics
+#' )
+#' @import moments
+#' @import data.table
+#' @export
+#' 
+als2metrics <- function(ALSFILE = NULL, 
+                        FIRST = NULL, 
+                        LAST = NULL, 
+                        INTERMEDIATE = NULL, 
+                        ALL_ECHOES = NULL, 
+                        PROP_MEAN_ETYP = NULL,
+                        BASIC_STATISTICS = NULL,
+                        PERCENTILE_SCALE = NULL,
+                        DENSITIES = NULL,
+                        DENSITIES_FIXED_TRESHOLD = NULL,
+                        INTENSITY_STATISTICS = NULL,
+                        INTENSITY_PERCENTILES = NULL, 
+                        CUTOFF = NULL, 
+                        MIN_ECHO_N = NULL, 
+                        output = NULL){
+  
+  if (is.null(ALSFILE) |
+      is.null(FIRST) | 
+      is.null(LAST) |
+      is.null(INTERMEDIATE) | 
+      is.null(ALL_ECHOES) | 
+      is.null(PROP_MEAN_ETYP) |
+      is.null(BASIC_STATISTICS) |
+      is.null(PERCENTILE_SCALE) |
+      is.null(DENSITIES) |
+      is.null(DENSITIES_FIXED_TRESHOLD) |
+      is.null(INTENSITY_STATISTICS) |
+      is.null(INTENSITY_PERCENTILES) | 
+      is.null(CUTOFF) | 
+      is.null(MIN_ECHO_N) | 
+      is.null(output)) {
+    stop("Error. Define the arguments of the als2metric function.")
+  }
+  
+  
   # Start the clock!
   start <- proc.time()
   
@@ -14,23 +90,23 @@ als2metrics <- function(ALSFILE, FIRST, LAST, INTERMEDIATE, ALL_ECHOES, PROP_MEA
   ########################################################
   PERCENTILES = T
   ety <- c(FIRST, LAST, INTERMEDIATE, ALL_ECHOES)
-  #Package for skewness and kurtosis
-  if(!is.element("moments", installed.packages()[,1]) == T)
-    install.packages("moments")
-  require(moments)
-  
-  #for subsetting and data reading performance
-  if(!is.element("data.table", installed.packages()[,1]) == T)
-    install.packages("data.table")
-  require(data.table)
+  # #Package for skewness and kurtosis
+  # if(!is.element("moments", installed.packages()[,1]) == T)
+  #   install.packages("moments")
+  # require(moments)
+  # 
+  # #for subsetting and data reading performance
+  # if(!is.element("data.table", installed.packages()[,1]) == T)
+  #   install.packages("data.table")
+  # require(data.table)
   
   ########################################################
   #reading "subprograms"
-  
-  source("basic_statistics.R")
-  source("main_function.R")
-  source("percentiles.R")
-  source("density.R")
+  # 
+  # source("basic_statistics.R")
+  # source("main_function.R")
+  # source("percentiles.R")
+  # source("density.R")
   
   intensity_stat <- intensity_yesORnot(INTENSITY_STATISTICS)
   intensity_perc <- intensity_yesORnot(INTENSITY_PERCENTILES)
