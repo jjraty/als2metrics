@@ -8,6 +8,9 @@
 #' @param rgbn_cols An indicator vector referring to the columns added 
 #' to the places of R, G, B, NIR in the output file (see the format in the Return section). 
 #'  Numeric vector or NULL
+#'  @param sub_clip A list including arguments for sub-clipping, e.g. circular plot. Note that no overlap checks are carried out.
+#'  The code assumes that there exists a polygon for sub-clipping for each plot/unit file. The linkage between las/laz files
+#'  and polygons are made based on IDs. An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, crs = 3067).
 #' @return \code{convlas2txt} outputs a .txt file to the user-defined path. 
 #' The output file follows the format: id, x, y, z, dz, i, echotype, 
 #' flightline, terraclass, numofret, retnum, R, G, B, NIR.
@@ -19,16 +22,25 @@
 #'               parse_element = 1,                # 2_plot.las, parse_element value 1 collects ID = 2 from the name of the las file.
 #'               rgbn_cols = c(16, 17, 18, 19))    # For example. If NULL, function returns values -1 for the last four columns.
 #' )
+#' With a sub-clipping
+#' convertlas2txt(las_folder = "C:/Temp/las_plots", # files: 1_plot.las, 2_plot.las... 
+#'               outfile = "C:/Temp/las_plots/plotpoints.txt", 
+#'               parse_element = 1,                # 2_plot.las, parse_element value 1 collects ID = 2 from the name of the las file.
+#'               rgbn_cols = c(16, 17, 18, 19),    # For example. If NULL, function returns values -1 for the last four columns.
+#'               sub_clip = list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, crs = 3067)) # id in the first column
+#' )
 #' @import rlas
 #' @import data.table
+#' @import sf
 #' @export
 #' 
 #'
 # JR 10 Feb 2023
 convlas2txt <- function(las_folder = NULL, 
-                           outfile = NULL, 
-                           parse_element = 1, 
-                           rgbn_cols = c(1, 2, 5, 6)) {
+                        outfile = NULL, 
+                        parse_element = 1, 
+                        rgbn_cols = NULL,
+                        sub_clip = NULL) {
   if (is.null(las_folder) |
       is.null(outfile) | 
       is.null(parse_element)) {
@@ -37,6 +49,10 @@ convlas2txt <- function(las_folder = NULL,
   
   if (file.exists(outfile)) {
     stop("Error. Outfile exists. Rename or remove.")
+  }
+  
+  if (!is.null(sub_clip)) {
+    clip_polys <- st_read(paste0(sub_clip$path_pols), quiet = TRUE)
   }
   
   las_fs <- list.files(las_folder, pattern = ".las|.laz")
@@ -56,8 +72,8 @@ convlas2txt <- function(las_folder = NULL,
       stop(paste0("Error. rgbn_cols indices out of bounds:", las_fs[i]))
     }
     
-    # Construct plot clip output txts from LAS file
-    txt_out <- data.table(id = rep(as.numeric(ids[i]), dim(las_f)[1]),
+    # Construct plot output txts from LAS file
+    txt_out <- data.table(plot_cell_id = rep(as.numeric(ids[i]), dim(las_f)[1]),
                           x = las_f$X,
                           y = las_f$Y, 
                           z = ifelse("Zref" %in% names(las_f), 
@@ -87,9 +103,24 @@ convlas2txt <- function(las_folder = NULL,
     txt_out$etype[txt_out$numofret > 2 & 
                         (txt_out$retnum != 1 & 
                            txt_out$retnum < txt_out$numofret)] <- 2 # interm.,mid
+    
+    # sub Clip 
+    if (!is.null(sub_clip)) {
+      point_geom <- st_as_sf(txt_out, coords = c("x", "y"), crs = sub_clip$crs)
+      sub_c <- st_intersects(x = st_geometry(point_geom), 
+                                y = subset(st_geometry(clip_polys), 
+                                           clip_polys[[ 
+                             sub_clip$id_col]] == unique(txt_out$plot_cell_id))) 
+      txt_out <- txt_out[lengths(sub_c) > 0, ] 
+      if (dim(txt_out)[1] == 0) {
+        stop(paste0("Sub-clipping failed. Perhaps ", 
+                    "mismatch IDs between las and polygyon files?"))
+      }
+    }
 
     fwrite(txt_out, outfile, col.names = FALSE, 
            row.names = FALSE, append = TRUE, sep = " ")
+    
   }
   # Return path to the output file
   return(outfile)

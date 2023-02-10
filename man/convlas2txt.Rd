@@ -8,7 +8,8 @@ convlas2txt(
   las_folder = NULL,
   outfile = NULL,
   parse_element = 1,
-  rgbn_cols = c(1, 2, 5, 6)
+  rgbn_cols = NULL,
+  sub_clip = NULL
 )
 }
 \arguments{
@@ -21,7 +22,10 @@ File names must have numeric ID separable by "_". String.}
 
 \item{rgbn_cols}{An indicator vector referring to the columns added 
 to the places of R, G, B, NIR in the output file (see the format in the Return section). 
- Numeric vector or NULL}
+ Numeric vector or NULL
+ @param sub_clip A list including arguments for sub-clipping, e.g. circular plot. Note that no overlap checks are carried out.
+ The code assumes that there exists a polygon for sub-clipping for each plot/unit file. The linkage between las/laz files
+ and polygons are made based on IDs. An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, crs = 3067).}
 }
 \value{
 \code{convlas2txt} outputs a .txt file to the user-defined path. 
@@ -37,5 +41,12 @@ convertlas2txt(las_folder = "C:/Temp/las_plots", # files: 1_plot.las, 2_plot.las
               outfile = "C:/Temp/las_plots/plotpoints.txt", 
               parse_element = 1,                # 2_plot.las, parse_element value 1 collects ID = 2 from the name of the las file.
               rgbn_cols = c(16, 17, 18, 19))    # For example. If NULL, function returns values -1 for the last four columns.
+)
+With a sub-clipping
+convertlas2txt(las_folder = "C:/Temp/las_plots", # files: 1_plot.las, 2_plot.las... 
+              outfile = "C:/Temp/las_plots/plotpoints.txt", 
+              parse_element = 1,                # 2_plot.las, parse_element value 1 collects ID = 2 from the name of the las file.
+              rgbn_cols = c(16, 17, 18, 19),    # For example. If NULL, function returns values -1 for the last four columns.
+              sub_clip = list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, crs = 3067)) # id in the first column
 )
 }

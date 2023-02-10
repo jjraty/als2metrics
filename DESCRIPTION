@@ -4,7 +4,7 @@ Title: als2metrics (based on version 15112017)
 Description: Compute metrics from a 3D point cloud
 Version: 0.0.2
 Date: 2023-02-10
-Imports: moments, data.table, rlas
+Imports: moments, data.table, rlas, sf
 Authors@R: c(person("Kotivuori", "Eetu", email = "eetu.kotivuori@smk.fi", role = c("aut")),
   person("Kukkonen", "Mikko", email = "mikko.kukkonen@luke.fi", role = c("aut")), 
   person("R\U00E4ty", "Janne", email = "janne.raty1@gmail.com", role = c("aut", "cre")),
