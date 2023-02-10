@@ -2,12 +2,14 @@
 #15.02.2017
 #Eetu Kotivuori, Mikko Kukkonen, Janne R?ty & Petteri Packalen
 ########################################################
-#' als2metris: Extract metrics from an airborne LiDAR point cloud
+#' als2metrics: Extract metrics from an airborne LiDAR point cloud
 #'
 #' \code{als2metrics} is used to extract metrics from an airborne LiDAR point cloud
 #' @param ALSFILE Specify an ALS file (text file), Format: plot_cell_id; x; y; z; dz, i; 
 #' echotype; flightline; terraclass; GPS-time (delimeter: space). 
-#' First seven columns must be in the abovementioned order, additional columns are optional. String.
+#' First seven columns must be in the abovementioned order, additional columns are optional.
+#' Echo type codes: 0 = Only echo, 1 = First of many echo, 
+#' 2 = Intermediate echo, 3 = Last of many echo. String.
 #' @param FIRST Output metrics computed based on  FIRST echoes (first + only)
 #' (rows). It is recommended to use row and column names. Logical.
 #' @param LAST Output metrics computed based on  LAST echoes (last + only). Logical.
@@ -113,7 +115,8 @@ als2metrics <- function(ALSFILE = NULL,
   
   #########READING ALS DATA###############################
   
-  data <- fread(ALSFILE, header = FALSE, drop=c("V8","V9","V10"))
+  #data <- fread(ALSFILE, header = FALSE, drop=c("V8","V9","V10"))
+  data <- fread(ALSFILE, header = FALSE) # JR: drop might cause problems.
   data <- as.data.frame(data)
   
   #########Finding unique PLOT/CELL ids###################

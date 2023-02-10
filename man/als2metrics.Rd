@@ -2,7 +2,7 @@
 % Please edit documentation in R/als2metrics.R
 \name{als2metrics}
 \alias{als2metrics}
-\title{als2metris: Extract metrics from an airborne LiDAR point cloud}
+\title{als2metrics: Extract metrics from an airborne LiDAR point cloud}
 \usage{
 als2metrics(
   ALSFILE = NULL,
@@ -25,7 +25,9 @@ als2metrics(
 \arguments{
 \item{ALSFILE}{Specify an ALS file (text file), Format: plot_cell_id; x; y; z; dz, i; 
 echotype; flightline; terraclass; GPS-time (delimeter: space). 
-First seven columns must be in the abovementioned order, additional columns are optional. String.}
+First seven columns must be in the abovementioned order, additional columns are optional.
+Echo type codes: 0 = Only echo, 1 = First of many echo, 
+2 = Intermediate echo, 3 = Last of many echo. String.}
 
 \item{FIRST}{Output metrics computed based on  FIRST echoes (first + only)
 (rows). It is recommended to use row and column names. Logical.}

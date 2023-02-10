@@ -1,14 +1,14 @@
 Package: als2metrics
 Type: Package
-Title: als2metrics (version date 15112017)
+Title: als2metrics (based on version 15112017)
 Description: Compute metrics from a 3D point cloud
-Version: 0.0.1
-Date: 2023-01-24
-Imports: moments, data.table
+Version: 0.0.2
+Date: 2023-02-10
+Imports: moments, data.table, rlas
 Authors@R: c(person("Kotivuori", "Eetu", email = "eetu.kotivuori@smk.fi", role = c("aut")),
   person("Kukkonen", "Mikko", email = "mikko.kukkonen@luke.fi", role = c("aut")), 
   person("R\U00E4ty", "Janne", email = "janne.raty1@gmail.com", role = c("aut", "cre")),
   person("Packalen", "Petteri", email = "petteri.packalen@luke.fi", role = c("aut")))
 Maintainer: Janne R\U00E4ty <janne.raty1@gmail.com>
 License: GPL3
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3

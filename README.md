@@ -1,7 +1,5 @@
 # als2metrics: An R package for the extraction of metrics from an airborne LiDAR point cloud
 
-Eetu Kotivuori, Mikko Kukkonen, Janne Räty & Petteri Packalen, 2017
-
 # Installation
 
 Install the *als2metrics* package from GitHub using the R package *remotes*:
@@ -101,3 +99,7 @@ int = intensity
 | int5/int10/.../int95 | Intensity percentiles                |
 | d0.5/d2/d5/.../d20   | Height densities                     |
 | echo_prob            | proportions of echo categories       |
+
+# Authors
+Original als2metrics and ai2metrics functions: Eetu Kotivuori, Mikko Kukkonen, Janne Räty & Petteri Packalen, 2017.
+Later modified and extended into the format of an R package: Janne Räty, 2023.
