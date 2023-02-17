@@ -158,7 +158,7 @@ als2metrics <- function(ALSFILE = NULL,
         cat("\n","Processing -", chosen[j],"- completed", i, "of", idcount)
         flush.console()
       }
-      else if ( (i %% 10) == 0 ) {
+      else if ( (i %% 100) == 0 ) {
         cat("\n","Processing -", chosen[j],"- completed", i, "of", idcount)
         flush.console()
       }

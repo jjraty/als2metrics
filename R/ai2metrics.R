@@ -62,7 +62,7 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
   for (i in 1:length(plot_cell_id)){
     
   
-    if ( (i %% 1000) == 0 ) {
+    if ( (i %% 100) == 0 ) {
       cat("\n","Processing -", chosen[j], "- completed", i, "of", idcount)
       flush.console()
     }
