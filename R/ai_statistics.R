@@ -1,5 +1,5 @@
 
-first_stats <- function(input_part, cutoff){
+first_stats_ai <- function(input_part, cutoff){
   
   input_part <- subset(input_part, input_part[, 5] >= cutoff)
   
@@ -28,7 +28,7 @@ first_stats <- function(input_part, cutoff){
   
 }
 
-datasets <- function(data){
+datasets_ai <- function(data){
   
     first <- subset(data, data[, 7] == 0 | data[, 7] == 1)
     assign("first_data", first, envir = .GlobalEnv)

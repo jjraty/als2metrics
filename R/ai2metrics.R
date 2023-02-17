@@ -49,7 +49,7 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
   
   # source("ai_statistics.R")
   
-  datasets(data)
+  datasets_ai(data)
   remove(data)
   first_data <- as.data.table(first_data)
   
@@ -73,7 +73,7 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
     
     
     if (length(which(DATA[, 5] > cutoff)) > (min_echo_n)) {
-      final_out <- first_stats(DATA, cutoff)
+      final_out <- first_stats_ai(DATA, cutoff)
       plot_id <- plot_cell_id[i]
       final_out <- cbind(plot_id, final_out)
       
@@ -85,7 +85,7 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
       temp[, ncol(temp) - 2] <- seq(1, (100), by = 1)
       temp[, ncol(temp) - 3] <- seq(1, (100), by = 1)
       
-      final_out <- first_stats(temp, cutoff)
+      final_out <- first_stats_ai(temp, cutoff)
       plot_id <- plot_cell_id[i]
       final_out[1, ] <- rep(-9999, dim(final_out)[2])
       final_out <- cbind(plot_id, final_out)
