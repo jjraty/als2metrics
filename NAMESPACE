@@ -3,6 +3,7 @@
 export(ai2metrics)
 export(als2metrics)
 export(convlas2txt)
+export(subcliptxt)
 import(data.table)
 import(moments)
 import(rlas)
