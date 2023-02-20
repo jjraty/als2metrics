@@ -77,7 +77,8 @@ subcliptxt <- function(txt_folder = NULL,
     # sub Clip 
     if (!is.null(sub_clip)) {
       point_geom <- st_as_sf(txt_f, 
-                             coords = c("V1", "V2"), crs = sub_clip$crs)
+                             coords = c("V1", "V2"), crs = sub_clip$crs, 
+                             remove = FALSE)
       
       # Polygons used for clipping
       polys <- subset(clip_polys, 
@@ -85,21 +86,21 @@ subcliptxt <- function(txt_folder = NULL,
       
       # check if many, use sub_col_id
       if (dim(polys)[1] > 1) {
-        for (j in 1:dim(polys)[1]) {
-          subsub_c <- st_intersects(x = st_geometry(point_geom), 
-                                    y = st_geometry(polys[j, ])) 
-          sub_txt <- txt_f[lengths(subsub_c) > 0, ] 
-          sub_txt$plot_cell_id <- rep(polys[[j, sub_clip$sub_id_col]], 
-                                      dim(sub_txt)[1])
-          if (dim(sub_txt)[1] == 0) {
-            stop(paste0("Sub-clipping failed, no points found. Perhaps ", 
-                        "mismatching IDs between txt and polygon files?"))
-          }
-          
-          fwrite(sub_txt, outfile, col.names = FALSE, 
-                 row.names = FALSE, append = TRUE, sep = " ")
-        }
+        # spatial join, code written without dplyr...
+        sub_txt <- st_join(x = point_geom, y = polys) 
+        sub_txt$plot_cell_id <- sub_txt[[which(names(sub_txt) == 
+                                      names(clip_polys)[sub_clip$sub_id_col])]]
+        sub_txt <- sub_txt[, names(txt_f)]
+        sub_txt <- st_drop_geometry(sub_txt)
+        sub_txt <- sub_txt[!is.na(sub_txt$plot_cell_id), ]
         
+        if (length(unique(sub_txt$plot_cell_id)) != dim(polys)[1]) {
+          stop(paste0("Sub-clipping failed, no points found. Perhaps ", 
+                      "mismatching IDs between txt and polygon files?"))
+        }
+        # write
+        fwrite(sub_txt, outfile, col.names = FALSE,
+               row.names = FALSE, append = TRUE, sep = " ")
       } else {
         sub_c <- st_intersects(x = st_geometry(point_geom), 
                                y = polys) 
