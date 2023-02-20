@@ -53,9 +53,6 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
   remove(data)
   first_data <- as.data.table(first_data)
   
-  
-  
-  
   ####MAIN PROGRAM
   plot_cell_results <- NULL
   
@@ -63,7 +60,8 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
     
   
     if ( (i %% 100) == 0 ) {
-      cat("\n","Processing -", chosen[j], "- completed", i, "of", idcount)
+      cat(paste0("Processing -", 
+          "first_data - completed", i, "of", idcount), fill = TRUE)
       flush.console()
     }
     
