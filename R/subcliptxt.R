@@ -66,6 +66,7 @@ subcliptxt <- function(txt_folder = NULL,
     
     # Check if not polygons in a tile; skip if no; check id columns
     if (!any(clip_polys[[sub_clip$id_col]] %in% as.numeric(ids[i]))) {
+      cat("Warning: No polygons overlapping with a tile.", fill = TRUE)
       next
     }
 
