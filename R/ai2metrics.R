@@ -39,6 +39,8 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
   if (cutoff < 0 | min_echo_n <= 1) {
     stop("Error. Cutoff must be greated than 0 and min_echo_n greater than 1.")
   }
+  # Start the clock!
+  start <- proc.time()
   #########READING ALS DATA###############################
   
   #data <- fread(pointcloud, header = FALSE, drop = c("V8","V9","V10"))
@@ -106,7 +108,9 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
   
   write.table(round(plot_cell_results, 4), output, 
                row.names = FALSE, quote = FALSE, sep = " ")
-
+  if (verbose) {
+    cat("Process time:", proc.time()[3] - start[3], "seconds", fill = TRUE)
+  }
 }
 
 

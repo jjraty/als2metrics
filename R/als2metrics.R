@@ -156,13 +156,13 @@ als2metrics <- function(pointcloud = NULL,
     for (i in 1:length(plot_cell_id)){
    
       if (verbose & (i == idcount)) {
-        cat("\n","Processing -", chosen[j],"- completed", i,
+        cat("Processing -", chosen[j],"- completed", i,
             "of", idcount, fill = TRUE)
         flush.console()
       }
       
       if (verbose &  ((i %% 100) == 0) & (i != idcount)) {
-        cat("\n","Processing -", chosen[j],"- completed", i,
+        cat("Processing -", chosen[j],"- completed", i,
             "of", idcount, fill = TRUE)
         flush.console()
       }
@@ -259,7 +259,7 @@ als2metrics <- function(pointcloud = NULL,
   write.table(round(final_table,4), output, 
               row.names = FALSE, quote = FALSE, sep=" ")
   if (verbose) {
-    cat("\n","Process time:", proc.time()[3] - start[3], "seconds", fill = TRUE)
+    cat("Process time:", proc.time()[3] - start[3], "seconds", fill = TRUE)
   }
   
 }
