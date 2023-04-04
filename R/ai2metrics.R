@@ -27,12 +27,18 @@
 #' @export
 #' 
 ai2metrics <- function(pointcloud = NULL, cutoff = 0, 
-                       min_echo_n = 10, output = NULL){
+                       min_echo_n = 10, output = NULL, verbose = TRUE){
   
   if (is.null(pointcloud) | is.null(output)) {
     stop("Error. Define the arguments of the ai2metric function.")
   }
+  if (!is.numeric(cutoff) | !is.numeric(min_echo_n)) {
+    stop("Error. Invalid cutoff or min_echo_n.")
+  } 
   
+  if (cutoff < 0 | min_echo_n <= 1) {
+    stop("Error. Cutoff must be greated than 0 and min_echo_n greater than 1.")
+  }
   #########READING ALS DATA###############################
   
   #data <- fread(pointcloud, header = FALSE, drop = c("V8","V9","V10"))
@@ -49,7 +55,7 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
   
   # source("ai_statistics.R")
   
-  datasets_ai(data)
+  first_data <- datasets_ai(data)
   remove(data)
   first_data <- as.data.table(first_data)
   
@@ -59,9 +65,9 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
   for (i in 1:length(plot_cell_id)){
     
   
-    if ( (i %% 100) == 0 ) {
+    if (verbose & ((i %% 100) == 0)) {
       cat("Processing -", 
-          "first_data - completed", i, "of", length(plot_cell_id))
+          "first_data - completed", i, "of", length(plot_cell_id), fill = TRUE)
       flush.console()
     }
     

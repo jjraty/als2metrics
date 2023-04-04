@@ -5,56 +5,57 @@
 \title{als2metrics: Extract metrics from an airborne LiDAR point cloud}
 \usage{
 als2metrics(
-  ALSFILE = NULL,
-  FIRST = NULL,
-  LAST = NULL,
-  INTERMEDIATE = NULL,
-  ALL_ECHOES = NULL,
-  PROP_MEAN_ETYP = NULL,
-  BASIC_STATISTICS = NULL,
-  PERCENTILE_SCALE = NULL,
-  DENSITIES = NULL,
-  DENSITIES_FIXED_TRESHOLD = NULL,
-  INTENSITY_STATISTICS = NULL,
-  INTENSITY_PERCENTILES = NULL,
-  CUTOFF = NULL,
-  MIN_ECHO_N = NULL,
-  output = NULL
+  pointcloud = NULL,
+  first = TRUE,
+  last = TRUE,
+  intermediate = TRUE,
+  all = TRUE,
+  ecat_prop = TRUE,
+  basic_stats = TRUE,
+  quantiles = seq(0.05, 0.95, 0.05),
+  densities = TRUE,
+  densities_ft = c(0.5, 2, 5, 10, 15, 20),
+  intensity_stats = TRUE,
+  intensity_p = TRUE,
+  cutoff = 0,
+  min_echo_n = 10,
+  output = NULL,
+  verbose = TRUE
 )
 }
 \arguments{
-\item{ALSFILE}{Specify an ALS file (text file), Format: plot_cell_id; x; y; z; dz, i; 
+\item{pointcloud}{Specify an ALS file (text file), Format: plot_cell_id; x; y; z; dz, i; 
 echotype; flightline; terraclass; GPS-time (delimeter: space). 
 First seven columns must be in the abovementioned order, additional columns are optional.
 Echo type codes: 0 = Only echo, 1 = First of many echo, 
 2 = Intermediate echo, 3 = Last of many echo. String.}
 
-\item{FIRST}{Output metrics computed based on  FIRST echoes (first + only)
+\item{first}{Output metrics computed based on  first echoes (first + only)
 (rows). It is recommended to use row and column names. Logical.}
 
-\item{LAST}{Output metrics computed based on  LAST echoes (last + only). Logical.}
+\item{last}{Output metrics computed based on  last echoes (last + only). Logical.}
 
-\item{INTERMEDIATE}{Output metrics computed based on INTERMEDIATE echoes (intermediate). Logical.}
+\item{intermediate}{Output metrics computed based on intermediate echoes (intermediate). Logical.}
 
-\item{ALL_ECHOES}{Output metrics computed based on ALL echoes (first, last, only and intermediate). Logical.}
+\item{all}{Output metrics computed based on ALL echoes (first, last, only and intermediate). Logical.}
 
-\item{PROP_MEAN_ETYP}{Calculate mean and standard deviation of heights and the proportion of echoes categories. Logical.}
+\item{ecat_prop}{Calculate mean and standard deviation of heights and the proportion of echoes categories. Logical.}
 
-\item{BASIC_STATISTICS}{Calculates mean, std, med, min, max, skew, kurt. Logical.}
+\item{basic_stats}{Calculates mean, std, med, min, max, skew, kurt. Logical.}
 
-\item{PERCENTILE_SCALE}{A vector of percentiles, e.g using seq(...) function. Percentiles are calculated using quantile() -function (using default type=7)}
+\item{quantiles}{A vector of percentiles, e.g using seq(...) function. Percentiles are calculated using quantile() -function (using default type=7)}
 
-\item{DENSITIES}{Calculates densities, i.e. echo proportion under or equal to the determined height value. Logical.}
+\item{densities}{Calculates densities, i.e. echo proportion under or equal to the determined height value. Logical.}
 
-\item{DENSITIES_FIXED_TRESHOLD}{The height values fixed height densities are computed. Vector.}
+\item{densities_ft}{The height values fixed height densities are computed. Vector.}
 
-\item{INTENSITY_STATISTICS}{Calculates mean_int, std_int, med_int, min_int, max_int, skew_int, kurt_int}
+\item{intensity_stats}{Calculates mean_int, std_int, med_int, min_int, max_int, skew_int, kurt_int}
 
-\item{INTENSITY_PERCENTILES}{Calculate perecentiles in the same manner as for dZ values ('Compute percentiles' must be set to TRUE). Logical.}
+\item{intensity_p}{Calculate perecentiles in the same manner as for dZ values ('Compute percentiles' must be set to TRUE). Logical.}
 
-\item{CUTOFF}{Cut off all echoes smaller or equal to the given threshold value. Numeric.}
+\item{cutoff}{Cut off all echoes smaller or equal to the given threshold value. Numeric.}
 
-\item{MIN_ECHO_N}{Minimum number of echoes to compute metrics. Numeric.}
+\item{min_echo_n}{Minimum number of echoes to compute metrics. Numeric.}
 
 \item{output}{A path of the output file, including file name as a .txt format. String.}
 }
@@ -65,20 +66,20 @@ Echo type codes: 0 = Only echo, 1 = First of many echo,
 \code{als2metrics} is used to extract metrics from an airborne LiDAR point cloud
 }
 \examples{
-als2metrics(ALSFILE = "C:/Temp/lidar_data.txt",            # A Path of an airborne LiDAR data file
-           FIRST = TRUE,                        			 # Compute first echo metrics
-           LAST = TRUE,                        			 # Compute last echo metrics
-           INTERMEDIATE = TRUE,                           # Compute intermediate echo metrics
-           ALL_ECHOES = TRUE,                             # Compute all echo metrics
-           PROP_MEAN_ETYP = TRUE,                         # Compute proportions of echo categories
-           BASIC_STATISTICS = TRUE,                       # Compute basic statistics
-           PERCENTILE_SCALE = seq(0.05, 0.95, 0.05),      # Vector of percentiles
-           DENSITIES = TRUE,                              # Compute densities
-           DENSITIES_FIXED_TRESHOLD = c(0.5, 2, 5, 10, 15, 20),    # Vector of heights in fixed height densities
-           INTENSITY_STATISTICS = TRUE,                            # Compute intensity statistics
-           INTENSITY_PERCENTILES = TRUE,                           # Compute intensity percentiles
-           CUTOFF = 0.0,                                  # Cutoff threshold
-           MIN_ECHO_N = 10,                               # Minimum number of echoes
-           output = "lidar_metrics.txt"                   # Output file 
+als2metrics(pointcloud = "C:/Temp/lidar_data.txt",     # A Path of an airborne LiDAR data file
+           first = TRUE,                        			 # Compute first echo metrics
+           last = TRUE,                        			 # Compute last echo metrics
+           intermediate = TRUE,                       # Compute intermediate echo metrics
+           all = TRUE,                                # Compute all echo metrics
+           ecat_prop = TRUE,                          # Compute proportions of echo categories
+           basic_stats = TRUE,                        # Compute basic statistics
+           quantiles = seq(0.05, 0.95, 0.05),         # Vector of percentiles
+           densities = TRUE,                          # Compute densities
+           densities_ft = c(0.5, 2, 5, 10, 15, 20),   # Vector of heights in fixed height densities
+           intensity_stats = TRUE,                    # Compute intensity statistics
+           intensity_p = TRUE,                        # Compute intensity percentiles
+           cutoff = 0.0,                              # Cutoff threshold
+           min_echo_n = 10,                           # Minimum number of echoes
+           output = "lidar_metrics.txt"               # Output file 
 )
 }

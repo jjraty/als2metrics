@@ -4,7 +4,13 @@
 \alias{ai2metrics}
 \title{ai2metrics: Extraction of aerial image metrics from spectral values linked to 3D point cloud}
 \usage{
-ai2metrics(pointcloud = NULL, cutoff = 0, min_echo_n = 10, output = NULL)
+ai2metrics(
+  pointcloud = NULL,
+  cutoff = 0,
+  min_echo_n = 10,
+  output = NULL,
+  verbose = TRUE
+)
 }
 \arguments{
 \item{pointcloud}{Specify a point cloud file (text file, delimited with space),

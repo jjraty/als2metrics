@@ -108,17 +108,18 @@ vektori <- function(echoTypes,data){
 
 datasets <- function(echoTypes,data){
   
-  if(echoTypes[1] == T){ # FIRST
+  if(echoTypes[1] == TRUE){ # FIRST
     first <- subset(data, data[,7] == 0 | data[,7] == 1)
-    assign("first_data", first, envir = .GlobalEnv)
+    #assign("first_data", first, envir = .GlobalEnv)
   }
-  if(echoTypes[2] == T){ # LAST
+  if(echoTypes[2] == TRUE){ # LAST
     last <- subset(data, data[,7] == 0 | data[,7] == 3)
-    assign("last_data", last, envir = .GlobalEnv)
+    #assign("last_data", last, envir = .GlobalEnv)
   }    
-  if(echoTypes[3] == T){ # middle
-    middle<- subset(data, data[,7] == 2)
-    assign("intermediate_data", middle, envir = .GlobalEnv)
+  if(echoTypes[3] == TRUE){ # middle
+    middle <- subset(data, data[,7] == 2)
+    #assign("intermediate_data", middle, envir = .GlobalEnv)
   }   
+  return(list(first_data = first, last_data = last, intermediate_data = middle))
 }
 
