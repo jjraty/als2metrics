@@ -8,54 +8,54 @@ Install the *als2metrics* package from GitHub using the R package *remotes*:
 remotes::install_github("jjraty/als2metrics", ref = "main")
 ```
 
-# An Example run and the descriptions of arguments
+# An Example run of the als2metrics function
 
 ``` r
-als2metrics(ALSFILE = "lidar_data.txt",            # A Path of an airborne LiDAR data file
-            FIRST = TRUE,                          # Compute first echo metrics
-            LAST = TRUE,                           # Compute last echo metrics
-            INTERMEDIATE = TRUE,                   # Compute intermediate echo metrics
-            ALL_ECHOES = TRUE,                     # Compute all echo metrics
-            PROP_MEAN_ETYP = TRUE,                 # Compute proportions of echo categories
-            BASIC_STATISTICS = TRUE,                        # Compute basic statistics
-            PERCENTILE_SCALE = seq(0.05, 0.95, 0.05),       # Vector of percentiles
-            DENSITIES = TRUE,                               # Compute densities
-            DENSITIES_FIXED_TRESHOLD = c(0.5, 2, 5, 10, 15, 20),    #  Vector of heights in fixed height densities
-            INTENSITY_STATISTICS = TRUE,                            # Compute intensity statistics
-            INTENSITY_PERCENTILES = TRUE,                           # Compute intensity percentiles
-            CUTOFF = 0.0,                             # Cutoff threshold
-            MIN_ECHO_N = 10,                          # Minimum number of echoes
+als2metrics(pointcloud = "lidar_data.txt",            # A Path of an airborne LiDAR data file
+            first = TRUE,                             # Compute first echo metrics
+            last = TRUE,                              # Compute last echo metrics
+            intermediate = TRUE,                      # Compute intermediate echo metrics
+            all = TRUE,                               # Compute all echo metrics
+            ecat_prop = TRUE,                         # Compute proportions of echo categories
+            basic_stats = TRUE,                       # Compute basic statistics
+            quantiles = seq(0.05, 0.95, 0.05),        # Vector of percentiles
+            densities = TRUE,                         # Compute densities
+            densities_ft = c(0.5, 2, 5, 10, 15, 20),  # Vector of heights in fixed height densities
+            intensity_stats = TRUE,                   # Compute intensity statistics
+            intensity_q = TRUE,                       # Compute intensity quantiles
+            cutoff = 0.0,                             # Cutoff threshold
+            min_echo_n = 10,                          # Minimum number of echoes
             output = "lidar_metrics.txt"              # Output file having ALS metrics
 )
 ```
 
-**ALSFILE:** Specify an airborne LiDAR data file (text file), Format: plot_cell_id; x; y; z; dz, i; echotype; flightline; terraclass; GPS-time (delimeter: space). First seven columns must be in the aforementioned order, additional columns are optional. String.
+**pointcloud:** Specify an airborne LiDAR data file (text file), Format: plot_cell_id; x; y; z; dz, i; echotype; flightline; terraclass; GPS-time (delimeter: space). First seven columns must be in the aforementioned order, additional columns are optional. String.
 
-**FIRST:** Output for FIRST echoes (first + only). Logical.
+**first:** Output for FIRST echoes (first + only). Logical.
 
-**LAST:** Output for LAST echoes (last + only). Logical.
+**last:** Output for LAST echoes (last + only). Logical.
 
-**INTERMEDIATE:** Output INTERMEDIATE echoes (intermediate). Logical.
+**intermediate:** Output INTERMEDIATE echoes (intermediate). Logical.
 
-**ALL_ECHOES:** Output ALL echoes (first, last, only and intermediate). Logical.
+**all:** Output ALL echoes (first, last, only and intermediate). Logical.
 
-**PROP_MEAN_ETYP:** Calculates mean and standard deviation of heights and the proportion of echoes categories. Logical.
+**ecat_prop:** Calculates mean and standard deviation of heights and the proportion of echoes categories. Logical.
 
-**BASIC_STATISTICS:** Calculates mean, std, med, min, max, skew, kurt. Logical.
+**basic_stats:** Calculates mean, std, med, min, max, skew, kurt. Skew and kurt computed using the functions of the moments package. Logical.
 
-**PERCENTILE_SCALE:** Set a vector of percentiles, e.g using seq(...) function. Percentiles are calculated using quantile() -function (using default type=7). Vector.
+**quantiles:** Set a vector of percentiles, e.g using seq(...) function. Percentiles are calculated using quantile() -function (using default type=7). Vector.
 
-**DENSITIES:** Calculates densities, i.e. echo proportion under or equal to the determined height value. Logical.
+**densities:** Calculates densities, i.e. echo proportion under or equal to the determined height value. Logical.
 
-**DENSITIES_FIXED_TRESHOLD:** The height values fixed height densities are computed. Vector.
+**densities_ft:** The height values fixed height densities are computed. Vector.
 
-**INTENSITY_STATISTICS:** Calculates mean_int, std_int, med_int, min_int, max_int, skew_int, kurt_int. Logical.
+**intensity_stats:** Calculates mean_int, std_int, med_int, min_int, max_int, skew_int, kurt_int. Logical.
 
-**INTENSITY_PERCENTILES:** Calculate perecentiles in the same manner as for dZ values ('Compute percentiles' must be set to TRUE). Logical.
+**intensity_q:** Calculate quantiles in the same manner as for dZ values (quantiles must be defined). Logical.
 
-**CUTOFF:** Cuts off all echoes smaller or equal to the given threshold value. Numeric.
+**cutoff:** Cuts off all echoes smaller or equal to the given threshold value. Numeric.
 
-**MIN_ECHO_N:** Minimum number of echoes to compute metrics. Numeric.
+**min_ehcho_n:** Minimum number of echoes to compute metrics. Numeric.
 
 **output:** Output path with a file name. Output file format is .txt. String.
 
@@ -99,6 +99,31 @@ int = intensity
 | int5/int10/.../int95 | Intensity percentiles                |
 | d0.5/d2/d5/.../d20   | Height densities                     |
 | echo_prob            | proportions of echo categories       |
+
+
+# An Example run of the ai2metrics function
+
+``` r
+ai2metrics(
+  pointcloud = "lidar_ai_data.txt",
+  cutoff = 0,
+  min_echo_n = 10,
+  output = "ai_metrics.txt",
+  verbose = TRUE
+)
+```
+## Output column names:
+
+| Abbreviation         | Description                          |
+|----------------------|--------------------------------------|
+| plot_cell_id         | Plot or cell id                      |
+| R/G/B/Nmax           | Maximum                              |
+| R/G/B/Nmin           | Minimum                              |
+| R/G/B/Nstd           | Standard deviation                   |
+| X_Ymrat              | Ratio between means of X and Y bands |
+| X_Ystdrat            | Ratio between stds of X and Y bands  |
+
+
 
 # Authors
 Original als2metrics and ai2metrics functions: Eetu Kotivuori, Mikko Kukkonen, Janne Räty & Petteri Packalen, 2017.

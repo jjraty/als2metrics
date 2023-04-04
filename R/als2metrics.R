@@ -16,12 +16,12 @@
 #' @param intermediate Output metrics computed based on intermediate echoes (intermediate). Logical.
 #' @param all Output metrics computed based on ALL echoes (first, last, only and intermediate). Logical.
 #' @param ecat_prop Calculate mean and standard deviation of heights and the proportion of echoes categories. Logical.
-#' @param basic_stats Calculates mean, std, med, min, max, skew, kurt. Logical.
+#' @param basic_stats Calculates mean, std, med, min, max, skew, kurt.Skew and kurt computed using the functions of the *moments* package. Logical.
 #' @param quantiles A vector of percentiles, e.g using seq(...) function. Percentiles are calculated using quantile() -function (using default type=7)
 #' @param densities  Calculates densities, i.e. echo proportion under or equal to the determined height value. Logical.
 #' @param densities_ft The height values fixed height densities are computed. Vector.
 #' @param intensity_stats Calculates mean_int, std_int, med_int, min_int, max_int, skew_int, kurt_int
-#' @param intensity_p Calculate perecentiles in the same manner as for dZ values ('Compute percentiles' must be set to TRUE). Logical.
+#' @param intensity_q Calculate quantiles in the same manner as for dZ values ('quantiles' must be defined). Logical.
 #' @param cutoff Cut off all echoes smaller or equal to the given threshold value. Numeric.
 #' @param min_echo_n Minimum number of echoes to compute metrics. Numeric.
 #' @param output A path of the output file, including file name as a .txt format. String.
@@ -40,7 +40,7 @@
 #'            densities = TRUE,                          # Compute densities
 #'            densities_ft = c(0.5, 2, 5, 10, 15, 20),   # Vector of heights in fixed height densities
 #'            intensity_stats = TRUE,                    # Compute intensity statistics
-#'            intensity_p = TRUE,                        # Compute intensity percentiles
+#'            intensity_q = TRUE,                        # Compute intensity percentiles
 #'            cutoff = 0.0,                              # Cutoff threshold
 #'            min_echo_n = 10,                           # Minimum number of echoes
 #'            output = "lidar_metrics.txt"               # Output file 
@@ -60,7 +60,7 @@ als2metrics <- function(pointcloud = NULL,
                         densities = TRUE,
                         densities_ft = c(0.5, 2, 5, 10, 15, 20),
                         intensity_stats = TRUE,
-                        intensity_p = TRUE, 
+                        intensity_q = TRUE, 
                         cutoff = 0.0, 
                         min_echo_n = 10, 
                         output = NULL,
@@ -112,7 +112,7 @@ als2metrics <- function(pointcloud = NULL,
   # source("density.R")
   
   intensity_stat <- intensity_yesORnot(intensity_stats)
-  intensity_perc <- intensity_yesORnot(intensity_p)
+  intensity_perc <- intensity_yesORnot(intensity_q)
   
   #########READING ALS DATA###############################
   
@@ -155,12 +155,13 @@ als2metrics <- function(pointcloud = NULL,
     idcount <- length(plot_cell_id)
     for (i in 1:length(plot_cell_id)){
    
-      if (verbose & (i == idcount )) {
+      if (verbose & (i == idcount)) {
         cat("\n","Processing -", chosen[j],"- completed", i,
             "of", idcount, fill = TRUE)
         flush.console()
       }
-      else if (verbose &  ((i %% 100) == 0 )) {
+      
+      if (verbose &  ((i %% 100) == 0) & (i != idcount)) {
         cat("\n","Processing -", chosen[j],"- completed", i,
             "of", idcount, fill = TRUE)
         flush.console()

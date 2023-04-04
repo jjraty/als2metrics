@@ -64,12 +64,18 @@ ai2metrics <- function(pointcloud = NULL, cutoff = 0,
   
   for (i in 1:length(plot_cell_id)){
     
-  
-    if (verbose & ((i %% 100) == 0)) {
+
+    if (verbose & ((i %% 100) == 0) & i != length(plot_cell_id)) {
       cat("Processing -", 
           "first_data - completed", i, "of", length(plot_cell_id), fill = TRUE)
       flush.console()
-    }
+    } 
+    
+    if (verbose & (i == length(plot_cell_id))) {
+      cat("Processing -", 
+          "first_data - completed", i, "of", length(plot_cell_id), fill = TRUE)
+      flush.console()
+    } 
     
    
     DATA <- first_data[V1 == plot_cell_id[i]]   #V1 contains the ID

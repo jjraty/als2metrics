@@ -16,7 +16,7 @@ als2metrics(
   densities = TRUE,
   densities_ft = c(0.5, 2, 5, 10, 15, 20),
   intensity_stats = TRUE,
-  intensity_p = TRUE,
+  intensity_q = TRUE,
   cutoff = 0,
   min_echo_n = 10,
   output = NULL,
@@ -41,7 +41,7 @@ Echo type codes: 0 = Only echo, 1 = First of many echo,
 
 \item{ecat_prop}{Calculate mean and standard deviation of heights and the proportion of echoes categories. Logical.}
 
-\item{basic_stats}{Calculates mean, std, med, min, max, skew, kurt. Logical.}
+\item{basic_stats}{Calculates mean, std, med, min, max, skew, kurt.Skew and kurt computed using the functions of the *moments* package. Logical.}
 
 \item{quantiles}{A vector of percentiles, e.g using seq(...) function. Percentiles are calculated using quantile() -function (using default type=7)}
 
@@ -51,7 +51,7 @@ Echo type codes: 0 = Only echo, 1 = First of many echo,
 
 \item{intensity_stats}{Calculates mean_int, std_int, med_int, min_int, max_int, skew_int, kurt_int}
 
-\item{intensity_p}{Calculate perecentiles in the same manner as for dZ values ('Compute percentiles' must be set to TRUE). Logical.}
+\item{intensity_q}{Calculate quantiles in the same manner as for dZ values ('quantiles' must be defined). Logical.}
 
 \item{cutoff}{Cut off all echoes smaller or equal to the given threshold value. Numeric.}
 
@@ -77,7 +77,7 @@ als2metrics(pointcloud = "C:/Temp/lidar_data.txt",     # A Path of an airborne L
            densities = TRUE,                          # Compute densities
            densities_ft = c(0.5, 2, 5, 10, 15, 20),   # Vector of heights in fixed height densities
            intensity_stats = TRUE,                    # Compute intensity statistics
-           intensity_p = TRUE,                        # Compute intensity percentiles
+           intensity_q = TRUE,                        # Compute intensity percentiles
            cutoff = 0.0,                              # Cutoff threshold
            min_echo_n = 10,                           # Minimum number of echoes
            output = "lidar_metrics.txt"               # Output file 
