@@ -4,7 +4,7 @@
 #' @param las_folder Path of folder that contains las files by plots/units. 
 #' File names must have numeric ID separable by "_". String.
 #' @param outfile Output file, full name including .txt suffix. String.
-#' @param parse_element An indicator referring to the ID part of file name. Numeric.
+#' @param parse_element An indicator referring to the ID part or parts of file name. Numeric or a vector of numeric.
 #' @param rgbn_cols An indicator vector referring to the columns added 
 #' to the places of R, G, B, NIR in the output file (see the format in the Return section). 
 #'  Numeric vector or NULL
@@ -56,9 +56,9 @@ convlas2txt <- function(las_folder = NULL,
   }
   
   las_fs <- list.files(las_folder, pattern = ".las|.laz")
-  ids <- sapply(las_fs, function(x) {
+  ids <- paste0(sapply(las_fs, function(x) {
                 as.numeric(unlist(strsplit(x, split = "_"))[parse_element])
-                })
+                }), collapse = "_")
   
   for (i in 1:length(las_fs)) {
       
@@ -73,7 +73,7 @@ convlas2txt <- function(las_folder = NULL,
     }
     
     # Construct plot output txts from LAS file
-    txt_out <- data.table(plot_cell_id = rep(as.numeric(ids[i]), dim(las_f)[1]),
+    txt_out <- data.table(plot_cell_id = rep(ids[i], dim(las_f)[1]),
                           x = las_f$X,
                           y = las_f$Y, 
                           z = ifelse("Zref" %in% names(las_f), 
