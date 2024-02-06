@@ -121,8 +121,19 @@ als2metrics <- function(pointcloud = NULL,
   data <- as.data.frame(data)
   
   #########Finding unique PLOT/CELL ids###################
+  # Check if string ID
+  if (identical(typeof(data[, 1]), "character")) {
+    char_ids <- TRUE
+    orig_stringid <- data[, 1]
+    id_table <- data.frame(orig = unique(orig_stringid), 
+                           newid = seq(1, length(unique(orig_stringid)), 1))
+    # fetch new id
+    data[, 1] <- apply(data, 1, \(x) {id_table$newid[id_table$orig == x[1]]})
+  } else {
+    char_ids <- FALSE
+  }
   
-  plot_cell_id <- sort(unique(data[,1]))
+  plot_cell_id <- sort(unique(data[, 1]))
   
   ########################################################
   #NEGATIVE VALUES TO ZERO
@@ -255,8 +266,16 @@ als2metrics <- function(pointcloud = NULL,
     final_table <- merge(final_table, intermediate_data_output, 
                          by.x = "plot_cell_id", by.y= "i_plot_cell_id")
   }
-
-  write.table(round(final_table,4), output, 
+  
+  final_table <- round(final_table, 4)
+  
+  # Fetch char ids if needed
+  if (char_ids) {
+    final_table[, 1] <- apply(final_table, 1, 
+                              \(x) {id_table$orig[id_table$newid == x[1]]})
+  }
+  
+  write.table(final_table, output, 
               row.names = FALSE, quote = FALSE, sep=" ")
   if (verbose) {
     cat("Process time:", proc.time()[3] - start[3], "seconds", fill = TRUE)

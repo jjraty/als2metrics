@@ -57,8 +57,8 @@ convlas2txt <- function(las_folder = NULL,
   
   las_fs <- list.files(las_folder, pattern = ".las|.laz")
   ids <- paste0(sapply(las_fs, function(x) {
-                as.numeric(unlist(strsplit(x, split = "_"))[parse_element])
-                }), collapse = "_")
+                paste0(unlist(strsplit(x, split = "_"))[parse_element], 
+                       collapse = "_")}))
   
   for (i in 1:length(las_fs)) {
       
