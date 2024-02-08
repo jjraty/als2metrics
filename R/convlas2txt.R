@@ -113,8 +113,9 @@ convlas2txt <- function(las_folder = NULL,
                              sub_clip$id_col]] == unique(txt_out$plot_cell_id))) 
       txt_out <- txt_out[lengths(sub_c) > 0, ] 
       if (dim(txt_out)[1] == 0) {
-        stop(paste0("Sub-clipping failed. Perhaps ", 
-                    "mismatch IDs between las and polygyon files?"))
+        cat(paste0("WARNING: Sub-clipping failed. Perhaps ", 
+                  "mismatch IDs between las and polygyon files?"), fill = TRUE)
+        next
       }
     }
 
