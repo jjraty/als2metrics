@@ -66,7 +66,7 @@ convlas2txt <- function(las_folder = NULL,
       cat("Converting las/laz to a single txt file...", i, "/", length(las_fs), fill = TRUE)
     }
       
-    las_f <- read.las(paste0(las_folder, "\\" ,las_fs[i]))
+    las_f <- read.las(paste0(las_folder, "/" ,las_fs[i]))
     
     if (any(rgbn_cols > dim(las_f)[2])) {
       stop(paste0("Error. rgbn_cols indices out of bounds:", las_fs[i]))

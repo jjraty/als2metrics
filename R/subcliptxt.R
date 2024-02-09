@@ -52,7 +52,6 @@ subcliptxt <- function(txt_folder = NULL,
   }
   
   txt_fs <- list.files(txt_folder, pattern = ".txt")
-  txt_fs_full <- list.files(txt_folder, pattern = ".txt", full.names = TRUE)
   ids <- sapply(txt_fs, function(x) {
     as.numeric(unlist(strsplit(x, split = "_"))[parse_element])
   })
@@ -70,7 +69,7 @@ subcliptxt <- function(txt_folder = NULL,
       next
     }
 
-    txt_f <- fread(paste0(txt_fs_full[i]))
+    txt_f <- fread(paste0(txt_folder, "/", txt_fs[i]))
     names <- colnames(txt_f)
     
     txt_f$plot_cell_id <- rep(as.numeric(ids[i]), dim(txt_f)[1])
