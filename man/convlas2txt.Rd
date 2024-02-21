@@ -18,14 +18,17 @@ File names must have numeric ID separable by "_". String.}
 
 \item{outfile}{Output file, full name including .txt suffix. String.}
 
-\item{parse_element}{An indicator referring to the ID part of file name. Numeric.}
+\item{parse_element}{An indicator referring to the ID part or parts of file name. Numeric or a vector of numeric.}
 
 \item{rgbn_cols}{An indicator vector referring to the columns added 
 to the places of R, G, B, NIR in the output file (see the format in the Return section). 
- Numeric vector or NULL
- @param sub_clip A list including arguments for sub-clipping, e.g. circular plot. Note that no overlap checks are carried out.
- The code assumes that there exists a polygon for sub-clipping for each plot/unit file. The linkage between las/laz files
- and polygons are made based on IDs. An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, crs = 3067).}
+ Numeric vector or NULL}
+
+\item{sub_clip}{A list including arguments for sub-clipping, e.g. circular plot. Note that no overlap checks are carried out.
+The code assumes that there exists a polygon for sub-clipping for each plot/unit file. The linkage between las/laz files
+and polygons are made based on IDs (id_col). The sub_id_col argument is used if several polygons per txt file exist.
+ An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 2, crs = 3067).
+ Note: id_col and sub_id_col strings will be concatenated using "_".}
 }
 \value{
 \code{convlas2txt} outputs a .txt file to the user-defined path. 
@@ -49,4 +52,9 @@ convertlas2txt(las_folder = "C:/Temp/las_plots", # files: 1_plot.las, 2_plot.las
               rgbn_cols = c(16, 17, 18, 19),    # For example. If NULL, function returns values -1 for the last four columns.
               sub_clip = list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, crs = 3067)) # id in the first column
 )
+convertlas2txt(las_folder = "C:/Temp/las_plots", # files: 1_plot.las, 2_plot.las... 
+              outfile = "C:/Temp/las_plots/plotpoints.txt", 
+              parse_element = c(1,2),                # plot_3_plot.las, parse_element specified as c(1, 2) returns "plot_3" for the processing
+              sub_clip = list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 3, crs = 3067)) # id in the first column, one pol per tile
+              # sub_id_col is used if there are several clips per plot
 }

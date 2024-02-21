@@ -22,7 +22,8 @@ File names must have numeric ID separable by "_". String.}
 \item{sub_clip}{A list including arguments for sub-clipping, e.g. circular plot. Note that no overlap checks are carried out.
 The code assumes that there exists a polygon for sub-clipping for each plot/unit file. The linkage between las/laz files
 and polygons are made based on IDs (id_col). The sub_id_col argument is used if several polygons per txt file exist.
- An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 2, crs = 3067).}
+ An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 2, crs = 3067).
+Note: id_col and sub_id_col strings will be concatenated using "_".}
 }
 \value{
 \code{subcli2txt} outputs a .txt file to the user-defined path. 

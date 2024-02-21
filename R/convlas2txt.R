@@ -8,9 +8,11 @@
 #' @param rgbn_cols An indicator vector referring to the columns added 
 #' to the places of R, G, B, NIR in the output file (see the format in the Return section). 
 #'  Numeric vector or NULL
-#'  @param sub_clip A list including arguments for sub-clipping, e.g. circular plot. Note that no overlap checks are carried out.
-#'  The code assumes that there exists a polygon for sub-clipping for each plot/unit file. The linkage between las/laz files
-#'  and polygons are made based on IDs. An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, crs = 3067).
+#' @param sub_clip A list including arguments for sub-clipping, e.g. circular plot. Note that no overlap checks are carried out.
+#' The code assumes that there exists a polygon for sub-clipping for each plot/unit file. The linkage between las/laz files
+#' and polygons are made based on IDs (id_col). The sub_id_col argument is used if several polygons per txt file exist.
+#'  An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 2, crs = 3067).
+#'  Note: id_col and sub_id_col strings will be concatenated using "_". 
 #' @return \code{convlas2txt} outputs a .txt file to the user-defined path. 
 #' The output file follows the format: id, x, y, z, dz, i, echotype, 
 #' flightline, terraclass, numofret, retnum, R, G, B, NIR.
@@ -29,11 +31,15 @@
 #'               rgbn_cols = c(16, 17, 18, 19),    # For example. If NULL, function returns values -1 for the last four columns.
 #'               sub_clip = list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, crs = 3067)) # id in the first column
 #' )
+#' convertlas2txt(las_folder = "C:/Temp/las_plots", # files: 1_plot.las, 2_plot.las... 
+#'               outfile = "C:/Temp/las_plots/plotpoints.txt", 
+#'               parse_element = c(1,2),                # plot_3_plot.las, parse_element specified as c(1, 2) returns "plot_3" for the processing
+#'               sub_clip = list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 3, crs = 3067)) # id in the first column, one pol per tile
+#'               # sub_id_col is used if there are several clips per plot
 #' @import rlas
 #' @import data.table
 #' @import sf
 #' @export
-#' 
 #'
 # JR 10 Feb 2023
 convlas2txt <- function(las_folder = NULL, 
@@ -55,15 +61,26 @@ convlas2txt <- function(las_folder = NULL,
     clip_polys <- st_read(paste0(sub_clip$path_pols), quiet = TRUE)
   }
   
-  las_fs <- list.files(las_folder, pattern = ".las|.laz")
+  fpattern <- ".las|.laz"
+  las_fs <- list.files(las_folder, pattern = fpattern)
+  # String id, omit file extension
   ids <- paste0(sapply(las_fs, function(x) {
-                paste0(unlist(strsplit(x, split = "_"))[parse_element], 
-                       collapse = "_")}))
+    idw_ext <- paste0(unlist(strsplit(x, split = "_"))[parse_element], 
+                      collapse = "_")
+    idwo_ext <- unlist(strsplit(idw_ext, split = fpattern))[1]
+    return(idwo_ext)}))
   
   for (i in 1:length(las_fs)) {
       
     if (i == 1 | (i %% 20 == 0)) {
       cat("Converting las/laz to a single txt file...", i, "/", length(las_fs), fill = TRUE)
+    }
+    
+    # Check if not polygons in a tile; skip if no; check id columns
+    if (!any(clip_polys[[sub_clip$id_col]] %in% ids[i])) {
+      cat(paste0("Warning: No polygons overlapping with a tile: ", ids[i]), 
+          fill = TRUE)
+      next
     }
       
     las_f <- read.las(paste0(las_folder, "/" ,las_fs[i]))
@@ -102,26 +119,68 @@ convlas2txt <- function(las_folder = NULL,
                     txt_out$retnum == 1] <- 1 # first of many
     txt_out$etype[txt_out$numofret > 2 & 
                         (txt_out$retnum != 1 & 
-                           txt_out$retnum < txt_out$numofret)] <- 2 # interm.,mid
+                           txt_out$retnum < txt_out$numofret)] <- 2 # inte.,mid
     
     # sub Clip 
     if (!is.null(sub_clip)) {
-      point_geom <- st_as_sf(txt_out, coords = c("x", "y"), crs = sub_clip$crs)
-      sub_c <- st_intersects(x = st_geometry(point_geom), 
-                                y = subset(st_geometry(clip_polys), 
-                                           clip_polys[[ 
-                             sub_clip$id_col]] == unique(txt_out$plot_cell_id))) 
-      txt_out <- txt_out[lengths(sub_c) > 0, ] 
-      if (dim(txt_out)[1] == 0) {
-        cat(paste0("WARNING: Sub-clipping failed. Perhaps ", 
-                  "mismatch IDs between las and polygyon files?"), fill = TRUE)
-        next
-      }
-    }
+      point_geom <- st_as_sf(txt_out, coords = c("x", "y"), crs = sub_clip$crs, 
+                             remove = FALSE)
+      # Polygons used for clipping, keep cols
+      polys <- subset(clip_polys, clip_polys[[sub_clip$id_col]] == 
+                                               unique(txt_out$plot_cell_id))
+      # check if many, use sub_col_id
+      if (dim(polys)[1] > 1) {
+        if (is.null(sub_clip$sub_id_col)) {
+          stop("Error: Invalid sub_id_col, Should be numeric!")
+        }
+        # spatial join, code written without dplyr...
+        sub_txt <- st_join(x = point_geom, y = polys) 
+        # Pick up ID, column index, append
+        sub_txt$plot_cell_id <- sub_txt[[which(names(sub_txt) == 
+                                      names(clip_polys)[sub_clip$sub_id_col])]]
 
-    fwrite(txt_out, outfile, col.names = FALSE, 
-           row.names = FALSE, append = TRUE, sep = " ")
-    
+        sub_txt <- sub_txt[, names(txt_out)]
+        sub_txt <- st_drop_geometry(sub_txt)
+        sub_txt <- sub_txt[!is.na(sub_txt$plot_cell_id), ] # Select desired
+        # update plot_cell_id: concatenate col_id and sub_col_id
+        sub_txt$plot_cell_id <- paste0(ids[i], "_", sub_txt$plot_cell_id)
+          
+        if (length(unique(sub_txt$plot_cell_id)) != dim(polys)[1]) {
+          cat(paste0("WARNING: Sub-clipping failed, no points found. Perhaps ", 
+                     "mismatching IDs between las and polygon files?"), 
+              fill = TRUE)
+          next
+        }
+        # write
+        fwrite(sub_txt, outfile, col.names = FALSE,
+               row.names = FALSE, append = TRUE, sep = " ")
+      } else {
+        sub_c <- st_intersects(x = st_geometry(point_geom), y = polys)
+        
+        txt_out <- txt_out[lengths(sub_c) > 0, ] 
+        if (dim(txt_out)[1] == 0) {
+          cat(paste0("WARNING: Sub-clipping failed. Perhaps ", 
+                     "mismatch IDs between las and polygyon files?"), 
+              fill = TRUE)
+          next
+        }
+        # update id with cat when sub_id_col used
+        if (!is.null(sub_clip$sub_id_col)) { 
+          sub_id_name <- polys[[sub_clip$sub_id_col]][
+                          which(polys[[sub_clip$id_col]] == ids[i])]
+          # update plot_cell_id: concatenate col_id and sub_col_id
+          txt_out$plot_cell_id <- paste0(ids[i], "_", sub_id_name)
+        }
+        
+        fwrite(txt_out, outfile, col.names = FALSE, 
+               row.names = FALSE, append = TRUE, sep = " ")
+      }
+      
+
+    } else { # No subclip requested
+      fwrite(txt_out, outfile, col.names = FALSE, 
+             row.names = FALSE, append = TRUE, sep = " ")
+    }
   }
   # Return path to the output file
   return(outfile)

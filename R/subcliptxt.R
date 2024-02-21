@@ -10,6 +10,7 @@
 #' The code assumes that there exists a polygon for sub-clipping for each plot/unit file. The linkage between las/laz files
 #' and polygons are made based on IDs (id_col). The sub_id_col argument is used if several polygons per txt file exist.
 #'  An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 2, crs = 3067).
+#' Note: id_col and sub_id_col strings will be concatenated using "_". 
 #' @return \code{subcli2txt} outputs a .txt file to the user-defined path. 
 #' The output file follows the format: id, x, y, z, dz, i, echotype, 
 #' flightline, terraclass, numofret, retnum, R, G, B, NIR.
@@ -50,12 +51,17 @@ subcliptxt <- function(txt_folder = NULL,
   if (!is.null(sub_clip)) {
     clip_polys <- st_read(paste0(sub_clip$path_pols), quiet = TRUE)
   }
-  
-  txt_fs <- list.files(txt_folder, pattern = ".txt")
-  ids <- sapply(txt_fs, function(x) {
-    as.numeric(unlist(strsplit(x, split = "_"))[parse_element])
-  })
-  
+  fpattern <- ".txt"
+  txt_fs <- list.files(txt_folder, pattern = fpattern)
+  # ids <- sapply(txt_fs, function(x) {
+  #   as.numeric(unlist(strsplit(x, split = "_"))[parse_element])})
+  # allow string ids
+  ids <- paste0(sapply(txt_fs, function(x) {
+    idw_ext <- paste0(unlist(strsplit(x, split = "_"))[parse_element], 
+           collapse = "_")
+    idwo_ext <- unlist(strsplit(idw_ext, split = fpattern))[1]
+    return(idwo_ext)}))
+
   for (i in 1:length(txt_fs)) {
     
     if (i == 1 | (i %% 10 == 0)) {
@@ -64,7 +70,7 @@ subcliptxt <- function(txt_folder = NULL,
     }
     
     # Check if not polygons in a tile; skip if no; check id columns
-    if (!any(clip_polys[[sub_clip$id_col]] %in% as.numeric(ids[i]))) {
+    if (!any(clip_polys[[sub_clip$id_col]] %in% ids[i])) {
       cat("Warning: No polygons overlapping with a tile.", fill = TRUE)
       next
     }
@@ -72,7 +78,7 @@ subcliptxt <- function(txt_folder = NULL,
     txt_f <- fread(paste0(txt_folder, "/", txt_fs[i]))
     names <- colnames(txt_f)
     
-    txt_f$plot_cell_id <- rep(as.numeric(ids[i]), dim(txt_f)[1])
+    txt_f$plot_cell_id <- rep(ids[i], dim(txt_f)[1])
     setcolorder(txt_f, neworder = c("plot_cell_id", names))
   
     # sub Clip 
@@ -87,6 +93,9 @@ subcliptxt <- function(txt_folder = NULL,
       
       # check if many, use sub_col_id
       if (dim(polys)[1] > 1) {
+        if (is.null(sub_clip$sub_id_col)) {
+          stop("Error: Invalid sub_id_col, Should be numeric!")
+        }
         # spatial join, code written without dplyr...
         sub_txt <- st_join(x = point_geom, y = polys) 
         sub_txt$plot_cell_id <- sub_txt[[which(names(sub_txt) == 
@@ -94,10 +103,14 @@ subcliptxt <- function(txt_folder = NULL,
         sub_txt <- sub_txt[, names(txt_f)]
         sub_txt <- st_drop_geometry(sub_txt)
         sub_txt <- sub_txt[!is.na(sub_txt$plot_cell_id), ]
+        # update plot_cell_id: concatenate col_id and sub_col_id
+        sub_txt$plot_cell_id <- paste0(ids[i], "_", sub_txt$plot_cell_id)
         
         if (length(unique(sub_txt$plot_cell_id)) != dim(polys)[1]) {
-          stop(paste0("Sub-clipping failed, no points found. Perhaps ", 
-                      "mismatching IDs between txt and polygon files?"))
+          cat(paste0("WARNING: Sub-clipping failed, no points found. Perhaps ", 
+                      "mismatching IDs between txt and polygon files?"), 
+                      fill = TRUE)
+          next
         }
         # write
         fwrite(sub_txt, outfile, col.names = FALSE,
@@ -107,9 +120,19 @@ subcliptxt <- function(txt_folder = NULL,
                                y = polys) 
         txt_f <- txt_f[lengths(sub_c) > 0, ] 
         if (dim(txt_f)[1] == 0) {
-          stop(paste0("Sub-clipping failed, no points found. Perhaps ", 
-                      "mismatching IDs between las and polygon files?"))
+          cat(paste0("WARNING: Sub-clipping failed, no points found. Perhaps ", 
+                      "mismatching IDs between las and polygon files?"),
+              fill = TRUE)
+          next
         }
+        # update id with cat when sub_id_col used
+        if (!is.null(sub_clip$sub_id_col)) { 
+          sub_id_name <- polys[[sub_clip$sub_id_col]][
+                          which(polys[[sub_clip$id_col]] == ids[i])]
+          # update plot_cell_id: concatenate col_id and sub_col_id
+          txt_f$plot_cell_id <- paste0(ids[i], "_", sub_id_name)
+        }
+        
         fwrite(txt_f, outfile, col.names = FALSE, 
                row.names = FALSE, append = TRUE, sep = " ")
       }
