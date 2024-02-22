@@ -9,8 +9,10 @@
 #' @param sub_clip A list including arguments for sub-clipping, e.g. circular plot. Note that no overlap checks are carried out.
 #' The code assumes that there exists a polygon for sub-clipping for each plot/unit file. The linkage between las/laz files
 #' and polygons are made based on IDs (id_col). The sub_id_col argument is used if several polygons per txt file exist.
-#'  An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 2, crs = 3067).
+#' An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 2, crs = 3067).
 #' Note: id_col and sub_id_col strings will be concatenated using "_". 
+#' @param drop_tailc Drops some columns that may be redundant in some applications. This saves memory.
+#' integer that defines how many cols will be dropped, counting from the last column. 0 = no removes.
 #' @return \code{subcli2txt} outputs a .txt file to the user-defined path. 
 #' The output file follows the format: id, x, y, z, dz, i, echotype, 
 #' flightline, terraclass, numofret, retnum, R, G, B, NIR.
@@ -35,9 +37,10 @@
 #'
 # JR 17 Feb 2023
 subcliptxt <- function(txt_folder = NULL, 
-                        outfile = NULL, 
-                        parse_element = 1,
-                        sub_clip = NULL) {
+                       outfile = NULL, 
+                       parse_element = 1,
+                       sub_clip = NULL, 
+                       drop_tailc = 0) {
   if (is.null(txt_folder) |
       is.null(outfile) | 
       is.null(parse_element)) {
@@ -46,6 +49,10 @@ subcliptxt <- function(txt_folder = NULL,
   
   if (file.exists(outfile)) {
     stop("Error. Outfile exists. Rename or remove.")
+  }
+  
+  if (!is.numeric(drop_tailc)) {
+    stop("Error: Invalid drop_tailc, should be numeric.")
   }
   
   if (!is.null(sub_clip)) {
@@ -82,6 +89,20 @@ subcliptxt <- function(txt_folder = NULL,
     
     txt_f$plot_cell_id <- rep(ids[i], dim(txt_f)[1])
     setcolorder(txt_f, neworder = c("plot_cell_id", names))
+    
+    if (drop_tailc > 0 & drop_tailc <= (ncol(txt_f) - 7)) { # limit dropping
+      oridim <- dim(txt_f)[2]
+      txt_f[, (ncol(txt_f) - (drop_tailc - 1)):ncol(txt_f) := NULL]
+      if (oridim == dim(txt_f)[2]) {
+        stop("Warning: Col drop failed.", fill = TRUE)
+      }
+    } else {
+      if (drop_tailc != 0) {
+        stop(paste0("Error: Check that ", 
+                    "drop_tailc == 0  or drop_tailc > 0 & ", 
+                    "drop_tailc <= (ncol(txt_f) - 7)"))
+      }
+    }
   
     # sub Clip 
     if (!is.null(sub_clip)) {

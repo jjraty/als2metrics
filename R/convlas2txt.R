@@ -12,7 +12,9 @@
 #' The code assumes that there exists a polygon for sub-clipping for each plot/unit file. The linkage between las/laz files
 #' and polygons are made based on IDs (id_col). The sub_id_col argument is used if several polygons per txt file exist.
 #'  An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 2, crs = 3067).
-#'  Note: id_col and sub_id_col strings will be concatenated using "_". 
+#'  Note: id_col and sub_id_col strings will be concatenated using "_".
+#' @param drop_tailc Drops some columns that may be redundant in some applications. This saves memory.
+#' This drops terraclass, numberofreturns, return number and RGBNIR. Logical.
 #' @return \code{convlas2txt} outputs a .txt file to the user-defined path. 
 #' The output file follows the format: id, x, y, z, dz, i, echotype, 
 #' flightline, terraclass, numofret, retnum, R, G, B, NIR.
@@ -46,11 +48,16 @@ convlas2txt <- function(las_folder = NULL,
                         outfile = NULL, 
                         parse_element = 1, 
                         rgbn_cols = NULL,
-                        sub_clip = NULL) {
+                        sub_clip = NULL, 
+                        drop_tailc = FALSE) {
   if (is.null(las_folder) |
       is.null(outfile) | 
       is.null(parse_element)) {
     stop("Error. Define the arguments of the als2metric function.")
+  }
+  
+  if (!is.logical(drop_tailc)) {
+    stop("Error: Invalid drop_tailc, should be logical.")
   }
   
   if (file.exists(outfile)) {
@@ -121,6 +128,10 @@ convlas2txt <- function(las_folder = NULL,
     txt_out$etype[txt_out$numofret > 2 & 
                         (txt_out$retnum != 1 & 
                            txt_out$retnum < txt_out$numofret)] <- 2 # inte.,mid
+    # drop some cols if requrested, saves memory
+    if (drop_tailc) {
+      txt_out <- txt_out[, 1:7]
+    }
     
     # sub Clip 
     if (!is.null(sub_clip)) {

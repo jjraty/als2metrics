@@ -9,7 +9,8 @@ convlas2txt(
   outfile = NULL,
   parse_element = 1,
   rgbn_cols = NULL,
-  sub_clip = NULL
+  sub_clip = NULL,
+  drop_tailc = FALSE
 )
 }
 \arguments{
@@ -29,6 +30,9 @@ The code assumes that there exists a polygon for sub-clipping for each plot/unit
 and polygons are made based on IDs (id_col). The sub_id_col argument is used if several polygons per txt file exist.
  An example argument: list(path_pols = "C:/Temp/circ_plots.gpkg", id_col = 1, sub_id_col = 2, crs = 3067).
  Note: id_col and sub_id_col strings will be concatenated using "_".}
+
+\item{drop_tailc}{Drops some columns that may be redundant in some applications. This saves memory.
+This drops terraclass, numberofreturns, return number and RGBNIR. Logical.}
 }
 \value{
 \code{convlas2txt} outputs a .txt file to the user-defined path. 
