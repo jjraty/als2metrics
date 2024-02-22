@@ -118,7 +118,7 @@ als2metrics <- function(pointcloud = NULL,
   
   #data <- fread(pointcloud, header = FALSE, drop=c("V8","V9","V10"))
   data <- fread(pointcloud, header = FALSE) # JR: drop might cause problems.
-  data <- as.data.frame(data)
+  data <- as.data.frame(data) # some syntax written for data.frame...
   
   #########Finding unique PLOT/CELL ids###################
   # Check if string ID
@@ -127,8 +127,12 @@ als2metrics <- function(pointcloud = NULL,
     orig_stringid <- data[, 1]
     id_table <- data.frame(orig = unique(orig_stringid), 
                            newid = seq(1, length(unique(orig_stringid)), 1))
+    id_vector <- setNames(id_table$newid, id_table$orig) # named vector
     # fetch new id
-    data[, 1] <- apply(data, 1, \(x) {id_table$newid[id_table$orig == x[1]]})
+    # apply is a very inefficient solution with large datasets
+    #data[, 1] <- apply(data, 1, \(x) {id_table$newid[id_table$orig == x[1]]})
+    # an efficient way to replace
+    data[, 1] <- id_vector[data[, 1]]
   } else {
     char_ids <- FALSE
   }
@@ -137,9 +141,9 @@ als2metrics <- function(pointcloud = NULL,
   
   ########################################################
   #NEGATIVE VALUES TO ZERO
-  data[,5][data[,5] < 0] <- 0.00
+  data[, 5][data[, 5] < 0] <- 0.00
   
-  chosen <- vektori(ety,data)
+  chosen <- vektori(ety, data)
   ecat_data <- datasets(ety, data)
   
   ########################################################
@@ -271,7 +275,8 @@ als2metrics <- function(pointcloud = NULL,
   
   # Fetch char ids if needed
   if (char_ids) {
-    final_table[, 1] <- apply(final_table, 1, 
+    # not optimal solution to loop but there are no many dimensions
+    final_table[, 1] <- apply(final_table, 1,
                               \(x) {id_table$orig[id_table$newid == x[1]]})
   }
   
