@@ -63,7 +63,8 @@ convlas2txt <- function(las_folder = NULL,
   
   fpattern <- ".las|.laz"
   las_fs <- list.files(las_folder, pattern = fpattern)
-  # String id, omit file extension
+  # String id, omit file extension: Note later on that R converts string to num
+  # while comparing but not opposite!
   ids <- paste0(sapply(las_fs, function(x) {
     idw_ext <- paste0(unlist(strsplit(x, split = "_"))[parse_element], 
                       collapse = "_")
@@ -77,7 +78,7 @@ convlas2txt <- function(las_folder = NULL,
     }
     
     # Check if not polygons in a tile; skip if no; check id columns
-    if (!any(clip_polys[[sub_clip$id_col]] %in% ids[i])) {
+    if (!any(as.character(clip_polys[[sub_clip$id_col]]) %in% ids[i])) {
       cat(paste0("Warning: No polygons overlapping with a tile: ", ids[i]), 
           fill = TRUE)
       next
@@ -126,12 +127,12 @@ convlas2txt <- function(las_folder = NULL,
       point_geom <- st_as_sf(txt_out, coords = c("x", "y"), crs = sub_clip$crs, 
                              remove = FALSE)
       # Polygons used for clipping, keep cols
-      polys <- subset(clip_polys, clip_polys[[sub_clip$id_col]] == 
+      polys <- subset(clip_polys, as.character(clip_polys[[sub_clip$id_col]]) == 
                                                unique(txt_out$plot_cell_id))
       # check if many, use sub_col_id
       if (dim(polys)[1] > 1) {
-        if (is.null(sub_clip$sub_id_col)) {
-          stop("Error: Invalid sub_id_col, Should be numeric!")
+        if (is.null(sub_clip$sub_id_col) | !is.numeric(sub_clip$sub_id_col)) {
+          stop("Error: Invalid sub_id_col arg!")
         }
         # spatial join, code written without dplyr...
         sub_txt <- st_join(x = point_geom, y = polys) 

@@ -55,7 +55,9 @@ subcliptxt <- function(txt_folder = NULL,
   txt_fs <- list.files(txt_folder, pattern = fpattern)
   # ids <- sapply(txt_fs, function(x) {
   #   as.numeric(unlist(strsplit(x, split = "_"))[parse_element])})
-  # allow string ids
+  # use string ids instead of nummeric
+  # Note later on that R converts string to num
+  # while comparing but not opposite!
   ids <- paste0(sapply(txt_fs, function(x) {
     idw_ext <- paste0(unlist(strsplit(x, split = "_"))[parse_element], 
            collapse = "_")
@@ -70,7 +72,7 @@ subcliptxt <- function(txt_folder = NULL,
     }
     
     # Check if not polygons in a tile; skip if no; check id columns
-    if (!any(clip_polys[[sub_clip$id_col]] %in% ids[i])) {
+    if (!any(as.character(clip_polys[[sub_clip$id_col]]) %in% ids[i])) {
       cat("Warning: No polygons overlapping with a tile.", fill = TRUE)
       next
     }
@@ -88,12 +90,12 @@ subcliptxt <- function(txt_folder = NULL,
                              remove = FALSE)
       
       # Polygons used for clipping
-      polys <- subset(clip_polys, 
-                clip_polys[[sub_clip$id_col]] == unique(txt_f$plot_cell_id))
+      polys <- subset(clip_polys, as.character(clip_polys[[sub_clip$id_col]]) == 
+                        unique(txt_f$plot_cell_id))
       
       # check if many, use sub_col_id
       if (dim(polys)[1] > 1) {
-        if (is.null(sub_clip$sub_id_col)) {
+        if (is.null(sub_clip$sub_id_col) | !is.numeric(sub_clip$sub_id_col)) {
           stop("Error: Invalid sub_id_col, Should be numeric!")
         }
         # spatial join, code written without dplyr...
