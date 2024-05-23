@@ -106,6 +106,20 @@ subcliptxt <- function(txt_folder = NULL,
   
     # sub Clip 
     if (!is.null(sub_clip)) {
+      bb_polys <- st_bbox(clip_polys) # crop if extent smaller than tile
+      buf_secure <- sqrt(as.numeric(max(st_area(clip_polys)))) * 2 # comp buf
+      # imp sped spat operations
+      txt_f <- txt_f[V1 >= (as.numeric(bb_polys[1]) - buf_secure) & 
+                     V1 <= (as.numeric(bb_polys[3]) + buf_secure) &
+                     V2 >= (as.numeric(bb_polys[2]) - buf_secure) &
+                     V2 <= (as.numeric(bb_polys[4]) + buf_secure)] 
+      
+      if (dim(txt_f)[1] == 0) {
+        cat(paste0("WARNING: No points found in ", txt_fs[i], 
+                   ". Skipping txt."), fill = TRUE)
+        next
+      }
+      
       point_geom <- st_as_sf(txt_f, 
                              coords = c("V1", "V2"), crs = sub_clip$crs, 
                              remove = FALSE)
@@ -123,6 +137,13 @@ subcliptxt <- function(txt_folder = NULL,
         sub_txt <- st_join(x = point_geom, y = polys) 
         sub_txt$plot_cell_id <- sub_txt[[which(names(sub_txt) == 
                                       names(clip_polys)[sub_clip$sub_id_col])]]
+        # Skip just if none points in polygons (note bbox was buffered!)
+        if (all(is.na(sub_txt$plot_cell_id))) {
+          cat(paste0("WARNING: No points found in ", txt_fs[i], 
+                     ". Skipping txt."), fill = TRUE)
+          next
+        }
+        
         sub_txt <- sub_txt[, names(txt_f)]
         sub_txt <- st_drop_geometry(sub_txt)
         sub_txt <- sub_txt[!is.na(sub_txt$plot_cell_id), ]
@@ -130,10 +151,11 @@ subcliptxt <- function(txt_folder = NULL,
         sub_txt$plot_cell_id <- paste0(ids[i], "_", sub_txt$plot_cell_id)
         
         if (length(unique(sub_txt$plot_cell_id)) != dim(polys)[1]) {
-          cat(paste0("WARNING: Sub-clipping failed, no points found. Perhaps ", 
-                      "mismatching IDs between txt and polygon files?"), 
+          cat(paste0("WARNING: Nothing to sub-clip for some of the polygons,",
+                     "no points found. Perhaps ", 
+                     "mismatching IDs between txt and polygon", 
+                     "files or no points in polygon?"), 
                       fill = TRUE)
-          next
         }
         # write
         fwrite(sub_txt, outfile, col.names = FALSE,
@@ -144,7 +166,7 @@ subcliptxt <- function(txt_folder = NULL,
         txt_f <- txt_f[lengths(sub_c) > 0, ] 
         if (dim(txt_f)[1] == 0) {
           cat(paste0("WARNING: Sub-clipping failed, no points found. Perhaps ", 
-                      "mismatching IDs between las and polygon files?"),
+                      "mismatching IDs between txt and polygon files?"),
               fill = TRUE)
           next
         }

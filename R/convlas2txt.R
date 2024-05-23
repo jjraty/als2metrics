@@ -135,8 +135,22 @@ convlas2txt <- function(las_folder = NULL,
     
     # sub Clip 
     if (!is.null(sub_clip)) {
+      bb_polys <- st_bbox(clip_polys) # crop if extent smaller than tile
+      buf_secure <- sqrt(as.numeric(max(st_area(clip_polys)))) * 2 # comp buf
+      # imp sped spat operations
+      txt_out <- txt_out[x >= (as.numeric(bb_polys[1]) - buf_secure) & 
+                         x <= (as.numeric(bb_polys[3]) + buf_secure) &
+                         y >= (as.numeric(bb_polys[2]) - buf_secure) &
+                         y <= (as.numeric(bb_polys[4]) + buf_secure)] 
+      if (dim(txt_out)[1] == 0) {
+        cat(paste0("WARNING: No points found in ", las_fs[i], 
+                   ". Skipping las."), fill = TRUE)
+        next
+      }
+      
       point_geom <- st_as_sf(txt_out, coords = c("x", "y"), crs = sub_clip$crs, 
                              remove = FALSE)
+      
       # Polygons used for clipping, keep cols
       polys <- subset(clip_polys, as.character(clip_polys[[sub_clip$id_col]]) == 
                                                unique(txt_out$plot_cell_id))
@@ -147,9 +161,16 @@ convlas2txt <- function(las_folder = NULL,
         }
         # spatial join, code written without dplyr...
         sub_txt <- st_join(x = point_geom, y = polys) 
+        
         # Pick up ID, column index, append
         sub_txt$plot_cell_id <- sub_txt[[which(names(sub_txt) == 
                                       names(clip_polys)[sub_clip$sub_id_col])]]
+        # Skip just if none points in polygons (note bbox was buffered!)
+        if (all(is.na(sub_txt$plot_cell_id))) {
+          cat(paste0("WARNING: No points found in ", las_fs[i], 
+                     ". Skipping las."), fill = TRUE)
+          next
+        }
 
         sub_txt <- sub_txt[, names(txt_out)]
         sub_txt <- st_drop_geometry(sub_txt)
@@ -158,10 +179,11 @@ convlas2txt <- function(las_folder = NULL,
         sub_txt$plot_cell_id <- paste0(ids[i], "_", sub_txt$plot_cell_id)
           
         if (length(unique(sub_txt$plot_cell_id)) != dim(polys)[1]) {
-          cat(paste0("WARNING: Sub-clipping failed, no points found. Perhaps ", 
-                     "mismatching IDs between las and polygon files?"), 
+          cat(paste0("WARNING: Nothing to sub-clip for some of the polygons,",
+                     "no points found. Perhaps ", 
+                     "mismatching IDs between las and polygon", 
+                     "files or no points in polygon?"), 
               fill = TRUE)
-          next
         }
         # write
         fwrite(sub_txt, outfile, col.names = FALSE,
