@@ -199,7 +199,7 @@ convlas2txt <- function(las_folder = NULL,
           next
         }
         # update id with cat when sub_id_col used
-        if (!is.null(sub_clip$sub_id_col) & !is.na(sub_clip$sub_id_col)) { 
+        if (!is.null(sub_clip$sub_id_col)) { 
           sub_id_name <- polys[[sub_clip$sub_id_col]][
                           which(polys[[sub_clip$id_col]] == ids[i])]
           # update plot_cell_id: concatenate col_id and sub_col_id
